@@ -1,0 +1,14 @@
+# 行尾符统一为 LF：本项目为 Windows/WSL2 双环境协同（见 docs/deployment.md §10.1），
+# 避免 CRLF/LF 差异造成整文件伪 diff、合并冲突与线上/本地字节比对歧义。
+* text=auto eol=lf
+
+# 明确按二进制处理（无行尾概念，防止被误判为文本而损坏）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

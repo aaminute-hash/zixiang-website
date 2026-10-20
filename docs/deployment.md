@@ -253,7 +253,8 @@ aliyun cdn RefreshObjectCaches --ObjectType Directory --ObjectPath "https://www.
 
 - 仓库：`aaminute-hash/zixiang-website`（建议 Public，便于 Pages 预览与协作者审阅）；
 - 分支：`main` 唯一主干，push 到 main 即触发自动部署；
-- 建议 `.gitignore` 排除：系统文件（`.DS_Store`、`Thumbs.db`）、编辑器目录（`.vscode/`、`.idea/`）、本地发布包 zip。
+- 建议 `.gitignore` 排除：系统文件（`.DS_Store`、`Thumbs.db`）、编辑器目录（`.vscode/`、`.idea/`）、本地发布包 zip；
+- `.gitattributes` 统一行尾为 LF（`* text=auto eol=lf`，位图/字体显式标记 binary）：本项目为 Windows/WSL2 双环境协同，避免 CRLF/LF 差异造成整文件伪 diff、合并冲突与线上/本地字节比对歧义（2026-10-21 验收 MD5 比对时发现该类差异后补充）；
 
 ### 10.2 本地开发（Windows 主环境，命令级）
 
