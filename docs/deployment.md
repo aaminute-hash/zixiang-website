@@ -278,7 +278,12 @@ python -m http.server 8080                  # 浏览器开 http://localhost:8080
 ### 10.3 自动部署（GitHub Pages，预览/验收环境）
 
 - 母本配置 `deploy/github-actions.yml`，活跃副本 `.github/workflows/deploy-pages.yml`（GitHub 仅从 `.github/workflows/` 读取工作流；变更流程：改母本 → 同步覆盖活跃副本 → push，两份头部注释已互相注明关系）；
-- 动作：push 到 main 后自动组装静态产物并部署到 GitHub Pages；`actions/configure-pages@v5` 需显式设置 `enablement: true`，仓库未启用 Pages 时由该步骤自动以 GitHub Actions 模式启用（该参数默认为 `false`，缺失时首次运行报 "Get Pages site failed: Not Found"，2026-10-21 实测）；如曾手动设置过 "Deploy from a branch" 来源，需先改回 GitHub Actions，否则冲突；
+- 动作：push 到 main 后自动组装静态产物并部署到 GitHub Pages；
+- **首次启用 Pages 是一次性人工动作，且 GITHUB_TOKEN 无法代劳**：configure-pages 的 `enablement: true` 尝试代建站点时会报 `Create Pages site failed: Resource not accessible by integration`（GitHub 平台限制：集成令牌无权创建 Pages 站点，2026-10-21 实测）。必须由仓库属主二选一：
+  - a) 仓库页面 → Settings → Pages → Build and deployment → Source 选 "GitHub Actions"；
+  - b) 或带 `repo` scope 的 PAT 调 API：`curl -X POST https://api.github.com/repos/aaminute-hash/zixiang-website/pages -H "Authorization: token <PAT>" -d '{"build_type":"workflow"}'`（本项目即用此法启用，已在线验证）；
+- 启用后 workflow 的 configure-pages 即可正常读取站点配置；`enablement: true` 保留作语义标记（该参数默认 `false`，站点缺失时报 "Get Pages site failed: Not Found"，2026-10-21 实测）；
+- 如曾手动设置过 "Deploy from a branch" 来源，需先改回 GitHub Actions，否则冲突；
 - 仓库一次性设置：Settings → Pages → Build and deployment → Source 选 **GitHub Actions**（不要选 "Deploy from a branch"，否则与本 workflow 冲突）；
 - 预览地址：`https://aaminute-hash.github.io/zixiang-website/`；
 - Workflow 权限最小化：仅 `contents: read`、`pages: write`、`id-token: write`；

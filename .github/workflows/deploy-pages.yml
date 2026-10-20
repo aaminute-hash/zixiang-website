@@ -7,9 +7,15 @@
 # 作用：组装静态站点产物（5 个页面 + 404.html + assets/）并部署到 GitHub Pages
 # 预览地址：https://aaminute-hash.github.io/zixiang-website/
 #
-# 一次性前置设置（仓库管理员操作）：
-#   仓库页面 → Settings → Pages → Build and deployment → Source: 选 "GitHub Actions"
-#   （不要选 "Deploy from a branch"，否则与本 workflow 的 pages 部署相互冲突）
+# 一次性前置设置（仓库管理员操作，GITHUB_TOKEN 无权代劳，二选一）：
+#   a) 仓库页面 → Settings → Pages → Build and deployment → Source: 选 "GitHub Actions"
+#   b) 或带 repo scope 的 PAT 调 API：
+#      curl -X POST https://api.github.com/repos/aaminute-hash/zixiang-website/pages \
+#        -H "Authorization: token <PAT>" -d '{"build_type":"workflow"}'
+#   （不要选 "Deploy from a branch"，否则与本 workflow 的 pages 部署相互冲突；
+#     configure-pages 的 enablement: true 无法突破"集成令牌无权创建 Pages 站点"的
+#     平台限制，会报 Create Pages site failed: Resource not accessible by integration，
+#     2026-10-21 实测）
 #
 # 定位说明：GitHub Pages 用作预览/演示/验收环境（Phase 4 验收）；
 #          正式生产环境为阿里云 OSS+CDN，OSS 自动发布为进阶选项，
