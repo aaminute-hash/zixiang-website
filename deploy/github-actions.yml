@@ -62,6 +62,11 @@ jobs:
 
       - name: 配置 Pages
         uses: actions/configure-pages@v5
+        with:
+          # enablement: true —— 仓库未启用 Pages 时由本步骤自动以 GitHub Actions 模式启用。
+          # 该参数默认为 false；缺失时首次运行会报
+          # "Get Pages site failed ... Error: Not Found"（2026-10-21 首次运行实测）。
+          enablement: true
 
       - name: 上传 Pages 产物
         uses: actions/upload-pages-artifact@v3

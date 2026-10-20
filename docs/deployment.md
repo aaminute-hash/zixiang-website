@@ -278,7 +278,7 @@ python -m http.server 8080                  # 浏览器开 http://localhost:8080
 ### 10.3 自动部署（GitHub Pages，预览/验收环境）
 
 - 母本配置 `deploy/github-actions.yml`，活跃副本 `.github/workflows/deploy-pages.yml`（GitHub 仅从 `.github/workflows/` 读取工作流；变更流程：改母本 → 同步覆盖活跃副本 → push，两份头部注释已互相注明关系）；
-- 动作：push 到 main 后自动组装静态产物并部署到 GitHub Pages；`actions/configure-pages@v5` 会在首次运行时自动以 GitHub Actions 模式启用 Pages，无需手动 UI 配置（如曾手动设置过 "Deploy from a branch" 来源，需先改回 GitHub Actions，否则冲突）；
+- 动作：push 到 main 后自动组装静态产物并部署到 GitHub Pages；`actions/configure-pages@v5` 需显式设置 `enablement: true`，仓库未启用 Pages 时由该步骤自动以 GitHub Actions 模式启用（该参数默认为 `false`，缺失时首次运行报 "Get Pages site failed: Not Found"，2026-10-21 实测）；如曾手动设置过 "Deploy from a branch" 来源，需先改回 GitHub Actions，否则冲突；
 - 仓库一次性设置：Settings → Pages → Build and deployment → Source 选 **GitHub Actions**（不要选 "Deploy from a branch"，否则与本 workflow 冲突）；
 - 预览地址：`https://aaminute-hash.github.io/zixiang-website/`；
 - Workflow 权限最小化：仅 `contents: read`、`pages: write`、`id-token: write`；
