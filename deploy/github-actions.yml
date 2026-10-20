@@ -1,0 +1,73 @@
+# =============================================================
+# 广东紫翔科技企业官网 — GitHub Pages 自动部署
+# 撰写：韩渡川（阿客实验室研发部）
+# 版本：v1.0 / 2026-10-21
+#
+# 触发：push 到 main 分支，或在 Actions 页面手动 workflow_dispatch
+# 作用：组装静态站点产物（5 个页面 + 404.html + assets/）并部署到 GitHub Pages
+# 预览地址：https://aaminute-hash.github.io/zixiang-website/
+#
+# 一次性前置设置（仓库管理员操作）：
+#   仓库页面 → Settings → Pages → Build and deployment → Source: 选 "GitHub Actions"
+#   （不要选 "Deploy from a branch"，否则与本 workflow 的 pages 部署相互冲突）
+#
+# 定位说明：GitHub Pages 用作预览/演示/验收环境（Phase 4 验收）；
+#          正式生产环境为阿里云 OSS+CDN，OSS 自动发布为进阶选项，
+#          详见 docs/deployment.md §2、§10.3、§10.5。
+#
+# 文件关系：本文件为模板母本；活跃副本位于 .github/workflows/deploy-pages.yml
+#          （GitHub 仅从 .github/workflows/ 目录读取工作流，deploy/ 下的不会触发）。
+#          变更流程：修改本文件 → 同步覆盖 .github/workflows/deploy-pages.yml → push
+# =============================================================
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 权限最小化：仅 Pages 部署所需
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只允许一个 Pages 部署；新推送取消进行中的旧部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout 仓库
+        uses: actions/checkout@v4
+
+      - name: 组装静态站点产物
+        run: |
+          mkdir -p dist
+          cp index.html about.html industries.html cooperation.html contact.html 404.html dist/
+          cp -r assets dist/
+          # 自检：5 个页面 + 404 页与关键资源必须齐全，缺失即使流水线失败
+          test -f dist/index.html && test -f dist/about.html && test -f dist/industries.html \
+            && test -f dist/cooperation.html && test -f dist/contact.html && test -f dist/404.html \
+            && test -f dist/assets/css/style.css && test -f dist/assets/js/main.js \
+            && test -d dist/assets/img
+          echo "站点产物清单："
+          find dist -type f | sort
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传 Pages 产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
